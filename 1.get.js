@@ -17,7 +17,10 @@ app.post('/', (req, res)=> {
   res.end('post end')
 })
 
-
+// all代表的是匹配所有的防范 * 代表匹配所有的路径 
+app.all('*', (req, res) => {
+  res.end(req.method + 'user')
+})
 
 app.listen(3002, ()=> {
   console.log('server start 3002')

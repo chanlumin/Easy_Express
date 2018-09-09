@@ -13,7 +13,7 @@ function createApplication() {
     for(let i = 0; i < app.routes.length; i++) {
       const {path, method, handler} = app.routes[i]
       // 请求的方法和请求的路径一样的还 才需要执行回调函数
-      if(method === m && pathname === path) {
+      if((method === m || method === 'all') && (pathname === path || path === '*')) {
         handler(req, res)
       }
     }
@@ -25,7 +25,14 @@ function createApplication() {
    * 存放路由 => 根据防范和
    */
   app.routes = []
-
+  app.all = function(path, handler) {
+    let layer = {
+      method: 'all', // 如果method是all表示全部匹配
+      path,
+      handler
+    }
+    app.routes.push(layer)
+  }
   http.METHODS.forEach(method => {
     /**
      * app的get请求,get主要做的事情就是把请求的参数push进去维护的路由数组
