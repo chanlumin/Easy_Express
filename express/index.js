@@ -12,25 +12,35 @@ function createApplication() {
 
     // 通过next方法进行迭代路由和中间件
     let index = 0
-    function next() {
+    function next(err) {
       // 如果数组全部迭代完 还没有找到 说明路径不存在
       if(index === app.routes.length) return res.end(`Cannot ${m} ${pathname}`)
       let {method, path, handler} = app.routes[index++] // 每次调用next就应该去下一个layer
-      if(method === 'middle') { // 处理中间件
-        // app.use('/')  use('/name') user('/name/hello')
-        if(path === '/' || path === pathname || pathname.startsWith(path + '/')) {
-          handler(req, res, next) // 如果匹配到就吧next到权限转交给 handler 需要再handler中手动执行才会继续匹配
-        } else  {
-          next() // 如果这个中间件没有匹配到 那么继续走下一层匹配
-        }
 
-      } else { // 处理路由
-          if((method = m || method == 'all') || (path === pathname || path === '*')) {
-            handler(req, res)
-          } else {
-            next()
-          }
+      if(err) {
+        if(handler.length === 4) {
+          // 如果有错误 就应该就去匹配错误中间件, 错误中间件的参数是4
+          handler(err, req, res, next)
+        } else {
+          next(err) // 没有匹配到就讲err继续传递进去 继续走下一个layer继续判断
         }
+      } else {
+        if(method === 'middle') { // 处理中间件
+          // app.use('/')  use('/name') user('/name/hello')
+          if(path === '/' || path === pathname || pathname.startsWith(path + '/')) {
+            handler(req, res, next) // 如果匹配到就吧next到权限转交给 handler 需要再handler中手动执行才会继续匹配
+          } else  {
+            next() // 如果这个中间件没有匹配到 那么继续走下一层匹配
+          }
+  
+        } else { // 处理路由
+            if((method = m || method == 'all') || (path === pathname || path === '*')) {
+              handler(req, res)
+            } else {
+              next()
+            }
+        }
+      }
       
     }
     next()

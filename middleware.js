@@ -17,6 +17,7 @@ app.use((req, res, next)=> {
 })
 app.use('/name', (req, res, next)=> {
   console.log('middle 3')
+  next('露露是帅哥')
   
 })
 app.get('/name/a', (req, res)=> {
@@ -26,6 +27,15 @@ app.get('/name/a', (req, res)=> {
 app.get('/age', (req, res)=> {
   res.setHeader('Content-type', 'text/html;charset=utf8')
   res.end(`年龄9岁`)
+})
+// 错误中间件  放到路由下面
+app.use((err, req, res, next)=> {
+  console.log(err)
+  next(err)
+})
+
+app.use((err, req, res, next)=> {
+  console.log(err)
 })
 
 app.listen('7777', ()=> {
