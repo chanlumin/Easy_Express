@@ -34,7 +34,7 @@ function createApplication() {
           }
   
         } else { // 处理路由
-            if((method = m || method == 'all') || (path === pathname || path === '*')) {
+            if((method === m || method === 'all') && (path === pathname || path === '*')) {
               handler(req, res)
             } else {
               next()
@@ -50,7 +50,7 @@ function createApplication() {
    * 存放路由 => 根据防范和
    */
   app.routes = []
-
+ 
   app.use = function(path, handler) {
     if(typeof handler !== 'function') {
       handler = path 
@@ -63,6 +63,18 @@ function createApplication() {
     }
     app.routes.push(layer) // 将中间件放到容器内
   }
+  /**
+   * express 内置内置中间件
+   */
+  app.use((req, res, next)=> {
+    let {pathname, query} = url.parse(req.url, true) 
+    let hostname = req.headers['host'].split(':')[0]
+    req.path = pathname
+    req.query = query 
+    req.hostname = hostname
+    // console.log(req.path, req.query, req.hostname)
+    next()
+  })
   app.all = function(path, handler) {
     let layer = {
       method: 'all', // 如果method是all表示全部匹配

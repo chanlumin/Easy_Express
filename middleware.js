@@ -8,6 +8,8 @@ let app = express()
 
 // use方法第一个参数如果不写 默认就是/
 app.use('/', (req, res, next)=> {
+  res.setHeader('Content-type', 'text/html;charset=utf8')
+
   console.log('middleware')
   next()
 })
@@ -18,14 +20,15 @@ app.use((req, res, next)=> {
 app.use('/name', (req, res, next)=> {
   console.log('middle 3')
   next('露露是帅哥')
-  
 })
 app.get('/name/a', (req, res)=> {
   res.end('哈哈哈')
 })
 
 app.get('/age', (req, res)=> {
-  res.setHeader('Content-type', 'text/html;charset=utf8')
+  console.log(req.path)
+  console.log(req.query)
+  console.log(req.hostname)
   res.end(`年龄9岁`)
 })
 // 错误中间件  放到路由下面
