@@ -13,6 +13,12 @@ app.get('/',(req, res)=> {
 //   res.end('age')
 // })
 
+app.post('/', (req, res)=> {
+  res.end('post end')
+})
+
+
+
 app.listen(3002, ()=> {
   console.log('server start 3002')
 })

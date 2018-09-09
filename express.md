@@ -24,4 +24,5 @@ app.listen = function( ){
   - 对比路由中的请求方法和请求路径. 如果相同执行回调函数
   - 否则返回res.end(`Cant ${method} ${path}`)
 
+> curl -X POST http://localhost:3002/ curl发送post 方法
 

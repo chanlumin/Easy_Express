@@ -25,22 +25,25 @@ function createApplication() {
    * 存放路由 => 根据防范和
    */
   app.routes = []
-  
-  /**
-   * app的get请求,get主要做的事情就是把请求的参数push进去维护的路由数组
-   * @param {请求路径} path 
-   * @param {请求方法} handler 
-   */
-  app.get = function(path, handler) {
-    // 路由匹配的对象
-    let layer = {
-      method: 'get',
-      path, 
-      handler
-    }
-    app.routes.push(layer)
 
-  }
+  http.METHODS.forEach(method => {
+    /**
+     * app的get请求,get主要做的事情就是把请求的参数push进去维护的路由数组
+     * @param {请求路径} path 
+     * @param {请求方法} handler 
+     */
+    method = method.toLocaleLowerCase()
+    app[method] = function(path, handler) {
+      // 路由匹配的对象
+      let layer = {
+        method,
+        path, 
+        handler
+      }
+      app.routes.push(layer)
+
+    }
+  })
 
   
   app.listen = function() {
