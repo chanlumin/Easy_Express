@@ -9,22 +9,50 @@ function createApplication() {
     // 1. 获取请求的方法
     let m = req.method.toLowerCase()
     let {pathname} = url.parse(req.url, true)
-    //  取出每一个layer
-    for(let i = 0; i < app.routes.length; i++) {
-      const {path, method, handler} = app.routes[i]
-      // 请求的方法和请求的路径一样的还 才需要执行回调函数
-      if((method === m || method === 'all') && (pathname === path || path === '*')) {
-        handler(req, res)
-      }
+
+    // 通过next方法进行迭代路由和中间件
+    let index = 0
+    function next() {
+      // 如果数组全部迭代完 还没有找到 说明路径不存在
+      if(index === app.routes.length) return res.end(`Cannot ${m} ${pathname}`)
+      let {method, path, handler} = app.routes[index++] // 每次调用next就应该去下一个layer
+      if(method === 'middle') { // 处理中间件
+        // app.use('/')  use('/name') user('/name/hello')
+        if(path === '/' || path === pathname || pathname.startsWith(path + '/')) {
+          handler(req, res, next) // 如果匹配到就吧next到权限转交给 handler 需要再handler中手动执行才会继续匹配
+        } else  {
+          next() // 如果这个中间件没有匹配到 那么继续走下一层匹配
+        }
+
+      } else { // 处理路由
+          if((method = m || method == 'all') || (path === pathname || path === '*')) {
+            handler(req, res)
+          } else {
+            next()
+          }
+        }
+      
     }
-    
-    res.end(`Cannot ${m} ${pathname}`)
+    next()
   }
 
   /**
    * 存放路由 => 根据防范和
    */
   app.routes = []
+
+  app.use = function(path, handler) {
+    if(typeof handler !== 'function') {
+      handler = path 
+      path = '/'
+    }
+    let layer = {
+      method: 'middle', // method市middle表示他是一个中间爱你就爱你 
+      path,
+      handler
+    }
+    app.routes.push(layer) // 将中间件放到容器内
+  }
   app.all = function(path, handler) {
     let layer = {
       method: 'all', // 如果method是all表示全部匹配
@@ -51,7 +79,6 @@ function createApplication() {
 
     }
   })
-
   
   app.listen = function() {
     let server = http.createServer(app)
